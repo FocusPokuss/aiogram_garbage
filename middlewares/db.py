@@ -1,8 +1,9 @@
-from aiogram.dispatcher.middlewares import BaseMiddleware, LifetimeControllerMiddleware
+from aiogram.dispatcher.middlewares import BaseMiddleware
+from sqlalchemy.orm import sessionmaker
 
 
 class DbPoolMiddleware(BaseMiddleware):
-    def __init__(self, pool):
+    def __init__(self, pool: sessionmaker):
         super().__init__()
         self.pool = pool
 

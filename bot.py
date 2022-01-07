@@ -1,11 +1,9 @@
 import asyncio
-import logging
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-
 from db.base import Base
 from middlewares.db import DbPoolMiddleware
 from middlewares.role import RoleMiddleware
@@ -44,6 +42,7 @@ async def main():
     dp.middleware.setup(DbPoolMiddleware(async_session))
     dp.middleware.setup(RoleMiddleware(ADMIN_ID))
 
+    # setup filters
     dp.filters_factory.bind(RoleFilter)
     dp.filters_factory.bind(AdminFilter)
 
@@ -54,7 +53,6 @@ async def main():
 
     # start polling
     try:
-        logging.info('start polling')
         print('Start polling!')
         await dp.start_polling()
     finally:

@@ -9,7 +9,7 @@ class RoleMiddleware(BaseMiddleware):
         super().__init__()
         self.admin_id = admin_id
 
-    async def on_pre_process_message(self, message: Message, data):
+    async def on_pre_process_message(self, message: Message, data: dict):
         if message.from_user.id == self.admin_id:
             data['role'] = Role.ADMIN
         elif message.from_user.id:
@@ -18,5 +18,5 @@ class RoleMiddleware(BaseMiddleware):
             data['role'] = None
 
     @staticmethod
-    async def on_post_process_message(message: Message, _, data):
+    async def on_post_process_message(message: Message, _, data: dict):
         del data['role']

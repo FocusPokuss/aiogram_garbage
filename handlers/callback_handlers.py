@@ -8,6 +8,7 @@ from utils.states import UserStates
 from db.db_api import get_photo, get_rating_by_id, send_reaction
 
 
+# send message with photo and if it's alredy exists, edit message
 async def show_photo(callback_query: CallbackQuery, pool: sessionmaker, state: FSMContext):
     last_bot_photo_id = (await state.get_data(None)).get('last_message_id')
     photo_id = int(callback_query.data.split('_')[-1])
@@ -27,7 +28,7 @@ async def show_photo(callback_query: CallbackQuery, pool: sessionmaker, state: F
     await callback_query.answer()
 
 
-async def change_rating(callback_query: CallbackQuery, pool):
+async def change_rating(callback_query: CallbackQuery, pool: sessionmaker):
     action = callback_query.data.startswith('actionlike')
     photo_id = int(callback_query.data.split('_')[-1])
     await send_reaction(callback_query.from_user.id, int(callback_query.data.split('_')[-1]), action, pool)
@@ -38,7 +39,7 @@ async def change_rating(callback_query: CallbackQuery, pool):
         await callback_query.answer('Вы уже выбрали этот вариант')
 
 
-async def change_page_photo(callback_query: CallbackQuery, state: FSMContext):
+async def change_kb_page(callback_query: CallbackQuery, state: FSMContext):
     await callback_query.message.edit_reply_markup(get_photos_kb((await state.get_data()).get('photos'),
                                                                  int(callback_query.data.split('_')[-1])))
 
@@ -58,9 +59,8 @@ async def rest_calls(*args):
 
 
 def register_callback_handlers(dp: Dispatcher):
-    # dp.register_callback_query_handler(show_kb, state=UserStates.watching_photos)
     dp.register_callback_query_handler(change_rating, state=UserStates.watching_photos, text_startswith='action')
     dp.register_callback_query_handler(show_photo, state=UserStates.watching_photos, text_startswith='photo')
-    dp.register_callback_query_handler(change_page_photo, state=UserStates.watching_photos, text_startswith='page')
+    dp.register_callback_query_handler(change_kb_page, state=UserStates.watching_photos, text_startswith='page')
     dp.register_callback_query_handler(exit_from_photos, state=UserStates.watching_photos, text='exit_from_photos')
     dp.register_callback_query_handler(rest_calls, state='*')
